@@ -30,10 +30,10 @@ typedef struct RCUTILS_PUBLIC_TYPE rcutils_char_array_t
 {
   char * buffer;
 
+  /// If this is true, we may safely free/realloc the buffer as needed.
   /**
-   * if this is true, we may safely free/realloc the buffer as needed;
-   * otherwise we will leave the buffer alone and alloc new memory if
-   * more space is needed
+   * Otherwise we will leave the buffer alone and alloc new memory if
+   * more space is needed.
    */
   bool owns_buffer;
 

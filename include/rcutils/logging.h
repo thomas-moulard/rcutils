@@ -94,7 +94,8 @@ extern bool g_rcutils_logging_initialized;
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-rcutils_ret_t rcutils_logging_initialize_with_allocator(rcutils_allocator_t allocator);
+rcutils_ret_t
+rcutils_logging_initialize_with_allocator(rcutils_allocator_t allocator);
 
 /// Initialize the logging system.
 /**
@@ -119,7 +120,8 @@ rcutils_ret_t rcutils_logging_initialize_with_allocator(rcutils_allocator_t allo
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-rcutils_ret_t rcutils_logging_initialize(void);
+rcutils_ret_t
+rcutils_logging_initialize(void);
 
 /// Shutdown the logging system.
 /**
@@ -140,7 +142,8 @@ rcutils_ret_t rcutils_logging_initialize(void);
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-rcutils_ret_t rcutils_logging_shutdown(void);
+rcutils_ret_t
+rcutils_logging_shutdown(void);
 
 /// The structure identifying the caller location in the source code.
 typedef struct rcutils_log_location_t
@@ -224,7 +227,8 @@ extern rcutils_logging_output_handler_t g_rcutils_logging_output_handler;
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-rcutils_logging_output_handler_t rcutils_logging_get_output_handler();
+rcutils_logging_output_handler_t
+rcutils_logging_get_output_handler(void);
 
 /// Set the current output handler.
 /**
@@ -239,7 +243,8 @@ rcutils_logging_output_handler_t rcutils_logging_get_output_handler();
  * \param function The function pointer of the output handler to be used.
  */
 RCUTILS_PUBLIC
-void rcutils_logging_set_output_handler(rcutils_logging_output_handler_t function);
+void
+rcutils_logging_set_output_handler(rcutils_logging_output_handler_t function);
 
 /// The default severity level for loggers.
 /**
@@ -265,7 +270,8 @@ extern int g_rcutils_logging_default_logger_level;
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-int rcutils_logging_get_default_logger_level();
+int
+rcutils_logging_get_default_logger_level(void);
 
 /// Set the default severity level for loggers.
 /**
@@ -284,7 +290,8 @@ int rcutils_logging_get_default_logger_level();
  * \param level The level to be used.
  */
 RCUTILS_PUBLIC
-void rcutils_logging_set_default_logger_level(int level);
+void
+rcutils_logging_set_default_logger_level(int level);
 
 /// Get the severity level for a logger.
 /**
@@ -309,7 +316,8 @@ void rcutils_logging_set_default_logger_level(int level);
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-int rcutils_logging_get_logger_level(const char * name);
+int
+rcutils_logging_get_logger_level(const char * name);
 
 /// Get the level for a logger and its name length.
 /**
@@ -334,7 +342,8 @@ int rcutils_logging_get_logger_level(const char * name);
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-int rcutils_logging_get_logger_leveln(const char * name, size_t name_length);
+int
+rcutils_logging_get_logger_leveln(const char * name, size_t name_length);
 
 /// Set the severity level for a logger.
 /**
@@ -358,7 +367,8 @@ int rcutils_logging_get_logger_leveln(const char * name, size_t name_length);
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-rcutils_ret_t rcutils_logging_set_logger_level(const char * name, int level);
+rcutils_ret_t
+rcutils_logging_set_logger_level(const char * name, int level);
 
 /// Determine if a logger is enabled for a severity level.
 /**
@@ -377,7 +387,8 @@ rcutils_ret_t rcutils_logging_set_logger_level(const char * name, int level);
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-bool rcutils_logging_logger_is_enabled_for(const char * name, int severity);
+bool
+rcutils_logging_logger_is_enabled_for(const char * name, int severity);
 
 /// Determine the effective level for a logger.
 /**
@@ -406,7 +417,8 @@ bool rcutils_logging_logger_is_enabled_for(const char * name, int severity);
  */
 RCUTILS_PUBLIC
 RCUTILS_WARN_UNUSED
-int rcutils_logging_get_logger_effective_level(const char * name);
+int
+rcutils_logging_get_logger_effective_level(const char * name);
 
 /// Log a message.
 /**
@@ -416,11 +428,11 @@ int rcutils_logging_get_logger_effective_level(const char * name);
  * <hr>
  * Attribute          | Adherence
  * ------------------ | -------------
- * Allocates Memory   | No, for formatted outputs <= 1023 characters
- *                    | Yes, for formatted outputs >= 1024 characters
+ * Allocates Memory   | Maybe [1]
  * Thread-Safe        | No
  * Uses Atomics       | No
  * Lock-Free          | Yes
+ * <i>[1] No, if the formatted string is <= 1023 characters, otherwise yes.</i>
  *
  * \param location The pointer to the location struct or NULL
  * \param severity The severity level
@@ -429,7 +441,8 @@ int rcutils_logging_get_logger_effective_level(const char * name);
  * \param ... The variable arguments
  */
 RCUTILS_PUBLIC
-void rcutils_log(
+void
+rcutils_log(
   const rcutils_log_location_t * location,
   int severity,
   const char * name,
@@ -448,10 +461,12 @@ void rcutils_log(
  * <hr>
  * Attribute          | Adherence
  * ------------------ | -------------
- * Allocates Memory   | No
- * Thread-Safe        | Yes, if the underlying *printf functions are
+ * Allocates Memory   | Maybe [1]
+ * Thread-Safe        | Yes [2]
  * Uses Atomics       | No
  * Lock-Free          | Yes
+ * <i>[1] depends on how the string formatting is implemented</i>
+ * <i>[2] if the underlying *printf functions are thread-safe (likely)</i>
  *
  * \param location The pointer to the location struct or NULL
  * \param severity The severity level
@@ -460,7 +475,8 @@ void rcutils_log(
  * \param log_str The string to be logged
  */
 RCUTILS_PUBLIC
-void rcutils_logging_console_output_handler(
+void
+rcutils_logging_console_output_handler(
   const rcutils_log_location_t * location,
   int severity, const char * name, rcutils_time_point_value_t timestamp,
   const char * log_str);

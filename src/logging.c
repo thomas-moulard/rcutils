@@ -64,9 +64,11 @@ bool g_force_stdout_line_buffered = false;
 bool g_stdout_flush_failure_reported = false;
 
 /**
- *  Handles formatting the log data into a common string format for every logger
+ * Handles formatting the log data into a common string format for every logger.
  */
-static void format_log(
+static
+void
+format_log(
   const rcutils_log_location_t * location,
   int severity, const char * name, rcutils_time_point_value_t timestamp,
   const char * format, va_list * args, rcutils_char_array_t * logging_output);
@@ -431,7 +433,7 @@ void rcutils_log(
   }
 }
 
-typedef struct logging_input
+typedef struct logging_input_t
 {
   const char * name;
   const rcutils_log_location_t * location;
@@ -439,20 +441,21 @@ typedef struct logging_input
   va_list * args;
   int severity;
   rcutils_time_point_value_t timestamp;
-} logging_input;
+} logging_input_t;
 
 typedef const char * (* token_handler)(
-  const logging_input * logging_input,
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output);
 
-typedef struct token_map_entry
+typedef struct token_map_entry_t
 {
   const char * token;
   token_handler handler;
-} token_map_entry;
+} token_map_entry_t;
 
-const char * expand_time(
-  const logging_input * logging_input, rcutils_char_array_t * logging_output,
+const char *
+expand_time(
+  const logging_input_t * logging_input, rcutils_char_array_t * logging_output,
   rcutils_ret_t (* time_func)(const rcutils_time_point_value_t *, char *, size_t))
 {
   // Temporary, local storage for integer/float conversion to string
@@ -465,22 +468,25 @@ const char * expand_time(
   APPEND_AND_RETURN_LOG_OUTPUT(numeric_storage);
 }
 
-const char * expand_time_as_seconds(
-  const logging_input * logging_input,
+const char *
+expand_time_as_seconds(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   return expand_time(logging_input, logging_output, rcutils_time_point_value_as_seconds_string);
 }
 
-const char * expand_time_as_nanoseconds(
-  const logging_input * logging_input,
+const char *
+expand_time_as_nanoseconds(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   return expand_time(logging_input, logging_output, rcutils_time_point_value_as_nanoseconds_string);
 }
 
-const char * expand_line_number(
-  const logging_input * logging_input,
+const char *
+expand_line_number(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   // Allow 9 digits for the expansion of the line number (otherwise, truncate).
@@ -504,15 +510,17 @@ const char * expand_line_number(
   APPEND_AND_RETURN_LOG_OUTPUT(line_number_expansion);
 }
 
-const char * expand_severity(
-  const logging_input * logging_input,
+const char *
+expand_severity(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   const char * severity_string = g_rcutils_log_severity_names[logging_input->severity];
   APPEND_AND_RETURN_LOG_OUTPUT(severity_string);
 }
 
-const char * expand_name(const logging_input * logging_input, rcutils_char_array_t * logging_output)
+const char *
+expand_name(const logging_input_t * logging_input, rcutils_char_array_t * logging_output)
 {
   if (NULL != logging_input->name) {
     APPEND_AND_RETURN_LOG_OUTPUT(logging_input->name);
@@ -520,8 +528,9 @@ const char * expand_name(const logging_input * logging_input, rcutils_char_array
   return logging_output->buffer;
 }
 
-const char * expand_message(
-  const logging_input * logging_input,
+const char *
+expand_message(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   char buf[1024] = "";
@@ -548,8 +557,9 @@ const char * expand_message(
   return ret;
 }
 
-const char * expand_function_name(
-  const logging_input * logging_input,
+const char *
+expand_function_name(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   if (logging_input->location) {
@@ -558,8 +568,9 @@ const char * expand_function_name(
   return logging_output->buffer;
 }
 
-const char * expand_file_name(
-  const logging_input * logging_input,
+const char *
+expand_file_name(
+  const logging_input_t * logging_input,
   rcutils_char_array_t * logging_output)
 {
   if (logging_input->location) {
@@ -568,7 +579,7 @@ const char * expand_file_name(
   return logging_output->buffer;
 }
 
-static const token_map_entry tokens[] = {
+static const token_map_entry_t tokens[] = {
   {.token = "severity", .handler = expand_severity},
   {.token = "name", .handler = expand_name},
   {.token = "message", .handler = expand_message},
@@ -579,10 +590,12 @@ static const token_map_entry tokens[] = {
   {.token = "line_number", .handler = expand_line_number},
 };
 
-token_handler find_token_handler(const char * token)
+token_handler
+find_token_handler(const char * token)
 {
-  int token_number = sizeof(tokens) / sizeof(tokens[0]);
-  for (int token_index = 0; token_index < token_number; token_index++) {
+  size_t token_number = sizeof(tokens) / sizeof(tokens[0]);
+  size_t token_index;
+  for (token_index = 0; token_index < token_number; token_index++) {
     if (strcmp(token, tokens[token_index].token) == 0) {
       return tokens[token_index].handler;
     }
@@ -602,7 +615,7 @@ static void format_log(
   const char * str = g_rcutils_logging_output_format_string;
   size_t size = strlen(g_rcutils_logging_output_format_string);
 
-  const logging_input logging_input = {
+  const logging_input_t logging_input = {
     .location = location,
     .severity = severity,
     .name = name,
@@ -619,8 +632,8 @@ static void format_log(
     size_t remaining_chars = size - i;
 
     if (chars_to_start_delim > 0) {  // there are stuff before a token start delimiter
-      size_t chars_to_copy = chars_to_start_delim >
-        remaining_chars ? remaining_chars : chars_to_start_delim;
+      size_t chars_to_copy =
+        (chars_to_start_delim > remaining_chars) ? remaining_chars : chars_to_start_delim;
       OK_OR_RETURN_EARLY(rcutils_char_array_strncat(logging_output, str + i, chars_to_copy));
       i += chars_to_copy;
       if (i >= size) {  // perhaps no start delimiter was found

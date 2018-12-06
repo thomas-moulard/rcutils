@@ -13,10 +13,11 @@
 // limitations under the License.
 
 #include <stdarg.h>
+
 #include "rcutils/error_handling.h"
 #include "rcutils/types/char_array.h"
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define RCUTILS_LOCAL_MIN(a, b) ((a) < (b) ? (a) : (b))
 
 rcutils_char_array_t
 rcutils_get_zero_initialized_char_array(void)
@@ -38,8 +39,8 @@ rcutils_char_array_init(
   const rcutils_allocator_t * allocator)
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(char_array, RCUTILS_RET_ERROR);
-  RCUTILS_CHECK_ALLOCATOR_WITH_MSG(allocator, "char array has no valid allocator",
-    return RCUTILS_RET_ERROR);
+  RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
+    allocator, "char array has no valid allocator", return RCUTILS_RET_ERROR);
 
   char_array->owns_buffer = true;
   char_array->buffer_length = 0lu;
@@ -67,8 +68,8 @@ rcutils_char_array_fini(rcutils_char_array_t * char_array)
 
   if (char_array->owns_buffer) {
     rcutils_allocator_t * allocator = &char_array->allocator;
-    RCUTILS_CHECK_ALLOCATOR_WITH_MSG(allocator, "char array has no valid allocator",
-      return RCUTILS_RET_ERROR);
+    RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
+      allocator, "char array has no valid allocator", return RCUTILS_RET_ERROR);
 
     allocator->deallocate(char_array->buffer, allocator->state);
   }
@@ -91,8 +92,8 @@ rcutils_char_array_resize(rcutils_char_array_t * char_array, size_t new_size)
   }
 
   rcutils_allocator_t * allocator = &char_array->allocator;
-  RCUTILS_CHECK_ALLOCATOR_WITH_MSG(allocator, "char array has no valid allocator",
-    return RCUTILS_RET_ERROR);
+  RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
+    allocator, "char array has no valid allocator", return RCUTILS_RET_ERROR);
 
   if (new_size == char_array->buffer_capacity) {
     // nothing to do here
@@ -114,13 +115,13 @@ rcutils_char_array_resize(rcutils_char_array_t * char_array, size_t new_size)
     if (ret != RCUTILS_RET_OK) {
       return ret;
     }
-    size_t n = MIN(new_size, old_size);
-    memcpy(char_array->buffer, old_buf, n);
-    char_array->buffer[n - 1] = '\0';  // always have an ending
+    size_t size_to_copy = RCUTILS_LOCAL_MIN(new_size, old_size);
+    memcpy(char_array->buffer, old_buf, size_to_copy);
+    char_array->buffer[size_to_copy - 1] = '\0';  // always have an ending
   }
 
   char_array->buffer_capacity = new_size;
-  char_array->buffer_length = MIN(new_size, old_length);
+  char_array->buffer_length = RCUTILS_LOCAL_MIN(new_size, old_length);
 
   return RCUTILS_RET_OK;
 }
@@ -137,7 +138,8 @@ rcutils_char_array_expand_as_needed(rcutils_char_array_t * char_array, size_t ne
   return rcutils_char_array_resize(char_array, new_size);
 }
 
-static int
+static
+int
 _rcutils_char_array_vsprintf(rcutils_char_array_t * char_array, const char * format, va_list args)
 {
   va_list args_clone;
