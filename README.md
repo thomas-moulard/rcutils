@@ -1,4 +1,6 @@
 # rcutils: ROS 2 C Utilities data structures
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fthomas-moulard%2Frcutils.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fthomas-moulard%2Frcutils?ref=badge_shield)
+
 
 `rcutils` is a C API consisting of macros, functions, and data structures used through out the ROS 2 code base.
 
@@ -54,3 +56,7 @@ The API is a combination of parts:
     - rcutils/types/string_map.h
 - Macros for controlling symbol visibility and linkage for this library:
   - rcutils/visibility_control.h
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fthomas-moulard%2Frcutils.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fthomas-moulard%2Frcutils?ref=badge_large)
